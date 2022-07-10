@@ -1,4 +1,4 @@
-resource "aws_ecr_repository" "dh-platform-techm-tools-lambda-repository" {
+resource "aws_ecr_repository" "dh-platform-techm-lambda-repository" {
   name = var.ecr-lambda-repo-name
 
   image_scanning_configuration {

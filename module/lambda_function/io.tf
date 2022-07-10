@@ -110,7 +110,7 @@ variable "ecr_registry" {
 variable "ecr_repo_name" {
   type        = string
   description = "ECR repository for Lambda functions"
-  default     = "dh-platform-techm-tools-lambda-repository"
+  default     = "dh-platform-techm-lambda-repository"
 }
 
 variable "docker_tag" {
@@ -125,7 +125,6 @@ data "aws_ecr_image" "function_image" {
 }
 
 locals {
-  archive_path      = "${var.base_path}/archive/${var.function_name}.zip"
   source_dir        = length(var.source_dir) == 0 ? "${var.base_path}/lambda/${var.function_name}/" : "${var.base_path}/lambda/${var.source_dir}/"
   handler           = length(var.handler) == 0 ? "lambda_function_${var.function_name}.handler" : "lambda_function_${var.handler}.handler"
   schedule_disabled = (var.schedule == "disabled") ? true : false

@@ -11,7 +11,7 @@ variable "dh_tags" {
 variable "ecr-lambda-repo-name" {
   type        = string
   description = "Name of ECR repository for Lambda functions"
-  default     = "dh-platform-techm-tools-lambda-repository"
+  default     = "dh-platform-techm-lambda-repository"
 }
 
 variable "docker_tag" {
