@@ -12,11 +12,8 @@ resource "aws_lambda_function" "lambda_function_container" {
     security_group_ids = var.security_groups
   }
 
-  dynamic "environment" {
-    for_each = local.environment_map
-    content {
-      env_vars = environment.value
-    }
+  environment {
+    variables = var.env_vars == null ? [] : [var.env_vars]
   }
 
   tags = var.dh_tags
