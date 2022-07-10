@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'lambda-base-image/**'
-    branches:
+    branches-ignore:
       - master
   workflow_dispatch:
 
