@@ -11,10 +11,11 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "dh-platform-techm-tools-lambda2"
+    bucket         = "test-platform-techm-tools-lambda"
     key            = "tfstate-techm_tools"
+    profile        = "dh-platform-techmetrics-lambda"
     region         = "eu-central-1"
-    dynamodb_table = "dh-platform-techm-tools-lambda-tf-statelock2"
+    dynamodb_table = "test-platform-techm-tools-lambda-tf-statelock2"
   }
 }
 
