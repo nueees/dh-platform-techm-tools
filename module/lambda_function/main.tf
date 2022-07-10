@@ -21,7 +21,7 @@ resource "aws_lambda_function" "lambda_function_container" {
 
 resource "aws_lambda_function_event_invoke_config" "lambda_function_event_invoke_config" {
   function_name          = var.function_name
-  qualifier              = var.deploy_type == "Image" ? aws_lambda_function.lambda_function_container[0].version : aws_lambda_function.lambda_function[0].version
+  qualifier              = aws_lambda_function.lambda_function_container[0].version
   maximum_retry_attempts = 0
 }
 
@@ -37,7 +37,7 @@ resource "aws_cloudwatch_event_target" "lambda_function_event_target" {
   count     = local.schedule_disabled ? 0 : 1
   rule      = aws_cloudwatch_event_rule.lambda_function_event_rule[0].name
   target_id = var.function_name
-  arn       = var.deploy_type == "Image" ? aws_lambda_function.lambda_function_container[0].arn : aws_lambda_function.lambda_function[0].arn
+  arn       = aws_lambda_function.lambda_function_container[0].arn
 }
 
 resource "aws_lambda_permission" "lambda_function_permission" {
