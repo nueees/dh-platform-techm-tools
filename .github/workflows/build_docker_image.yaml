@@ -106,3 +106,4 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_LATEST_TAG
 
 
+
