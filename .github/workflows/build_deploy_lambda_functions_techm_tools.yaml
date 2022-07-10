@@ -56,7 +56,7 @@ jobs:
       #terraform apply
       - name: Terraform Apply
         id: apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -lock=false
         working-directory: ${{ env.working-directory }}
 
       
