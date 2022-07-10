@@ -1,0 +1,106 @@
+name: Build and upload Lambda images to ECR
+
+on:
+  push:
+    paths:
+      - 'lambda/*/Dockerfile'
+      - 'lambda/*/*.py'
+    branches:
+      - master
+
+jobs:
+  detect-changed-lambdas:
+    name: Detect changed Lambda functions
+    runs-on: ubuntu-latest
+
+    outputs:
+      lambdas_files: ${{ steps.detect_changes.outputs.lambdas_files }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Detect changed Lambda files
+        uses: dorny/paths-filter@v2
+        id: detect_changes
+        with:
+          base: 'master'
+          list-files: 'json'
+          filters: |
+            lambdas: 'lambda/**'
+
+  apply-changed-lambdas:
+    name: Build Docker images for changed Lambdas
+    needs: detect-changed-lambdas
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: 'eu-central-1'
+      ECR_REPOSITORY: 'dh-platform-techm-lambda-repository'
+      DOCKER_TAG: ${{ github.sha }}
+
+    strategy:
+      matrix:
+        filename: ${{ fromJson(needs.detect-changed-lambdas.outputs.lambdas_files) }}
+      fail-fast: false
+
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Create Dockerfile if not present
+        id: create_dockerfile
+        working-directory: .
+        run: |
+          if [ ! -f "`dirname ${{ matrix.filename }}`/Dockerfile" ]
+          then
+            echo "Dockerfile NOT found ... creating."
+            LAMBDA_FILENAME="lambda_function_`dirname ${{ matrix.filename }} | xargs basename`"
+
+            echo "FROM 623160492249.dkr.ecr.eu-central-1.amazonaws.com/dh-platform-techm-lambda-repository:dh-platform-techm-lambda-base-image-latest AS builder
+          COPY ${LAMBDA_FILENAME}.py \${LAMBDA_TASK_ROOT}
+          CMD [ \""${LAMBDA_FILENAME}.handler"\" ]" >`dirname ${{ matrix.filename }}`/Dockerfile
+
+            cat `dirname ${{ matrix.filename }}`/Dockerfile
+          else
+            echo "Dockerfile found ... proceeding."
+          fi
+
+      - name: Configure AWS Credentials
+        id: aws_credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.LD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.LD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to AWS ECR
+        id: login_ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image and push to AWS ECR
+        id: build_and_push
+        env:
+          ECR_REGISTRY: ${{ steps.login_ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: '${{ env.DOCKER_TAG }}'
+          MATRIX_FILENAME: ${{ matrix.filename }}
+          LATEST_TAG: 'latest'
+        run: |
+          cd `dirname ${MATRIX_FILENAME}`
+          DOCKER_TAG_PREFIX="`dirname ${MATRIX_FILENAME} | xargs basename`"
+
+          if [[ ${MATRIX_FILENAME} == *.json ]]
+          then
+            cd ..
+            DOCKER_TAG_PREFIX="`echo $PWD | xargs basename`"
+          fi
+
+          DOCKER_IMAGE_TAG="${DOCKER_TAG_PREFIX}-${IMAGE_TAG}"
+          DOCKER_LATEST_TAG="${DOCKER_TAG_PREFIX}-${LATEST_TAG}"
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_LATEST_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$DOCKER_LATEST_TAG

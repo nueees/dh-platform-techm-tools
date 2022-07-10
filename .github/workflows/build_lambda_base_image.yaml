@@ -1,0 +1,50 @@
+name: Build base image for Lambda functions
+
+on:
+  push:
+    paths:
+      - 'lambda-base-image/**'
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  docker-image:
+    name: Build and push Lambda base image to AWS ECR
+    runs-on: ubuntu-latest
+
+    env:
+      working-directory: './lambda-base-image'
+      ECR_REPOSITORY: 'dh-platform-techm-tools-lambda-repository'
+      AWS_REGION: 'eu-central-1'
+      DOCKER_TAG_PREFIX: 'dh-platform-techm-lambda-base-image'
+      DOCKER_TAG: '${{ github.sha }}'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.LD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.LD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to AWS ECR
+        id: login_ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image to AWS ECR
+        id: push_ecr
+        working-directory: ${{ env.working-directory }}
+        env:
+          ECR_REGISTRY: ${{ steps.login_ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: '${{ env.DOCKER_TAG_PREFIX }}-${{ env.DOCKER_TAG }}'
+          LATEST_TAG: '${{ env.DOCKER_TAG_PREFIX }}-latest'
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$LATEST_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$LATEST_TAG

@@ -1,0 +1,6 @@
+**/.DS_Store
+lambda/codacy_import_bq/*
+**/.terraform.lock.hcl
+**/.terraform
+**/terraform.tfstate*
+**/.secrets
