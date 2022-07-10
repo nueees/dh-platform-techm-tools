@@ -7,7 +7,7 @@ on:
       - 'lambda/**'
       - 'terraform/lambda.tf'
       - 'modules/lambda_function/**'
-      - '.github/workflows/test_platform_techm_tools_lambdas.yaml'
+      - '.github/workflows/test_lambda_functions_techm_tools.yaml'
   workflow_dispatch:
       
 jobs:
