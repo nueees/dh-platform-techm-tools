@@ -75,7 +75,7 @@ variable "security_groups" {
 variable "env_vars" {
   type        = map(string)
   description = "Map of environment variables for this Lambda function"
-  default     = {}
+  default     = null
 }
 
 variable "dh_tags" {
@@ -130,7 +130,7 @@ locals {
   schedule_disabled = (var.schedule == "disabled") ? true : false
   image_tags        = data.aws_ecr_image.function_image.image_tags
   current_image_tag = tolist(setsubtract(local.image_tags, ["latest"]))[0]
-  environment_map   = var.env_vars == null ? {} : [var.env_vars]
+  environment_map   = var.env_vars == null ? [] : [var.env_vars]
 }
 
 output "lambda_arn" {
