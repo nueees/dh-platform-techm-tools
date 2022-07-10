@@ -15,7 +15,7 @@ resource "aws_lambda_function" "lambda_function_container" {
   dynamic "environment" {
     for_each = local.environment_map
     content {
-      variables = environment.value
+      env_vars = environment.value
     }
   }
 
