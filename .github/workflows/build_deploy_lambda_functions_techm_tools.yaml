@@ -56,7 +56,7 @@ jobs:
       #terraform apply
       - name: Terraform Apply
         id: apply
-        run: terraform destroy
+        run: terraform destroy -lock=false
         working-directory: ${{ env.working-directory }}
 
       
