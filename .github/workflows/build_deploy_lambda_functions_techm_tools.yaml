@@ -29,11 +29,6 @@ jobs:
           aws-access-key-id: ${{ secrets.LD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.LD_AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
-
-      - name: Set up NodeJS
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14
           
       #terraform init
       - name: 'Terraform Init'
@@ -55,7 +50,7 @@ jobs:
       #terraform plan
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -no-color -lock=false
         working-directory: ${{ env.working-directory }}
 
       #terraform apply
