@@ -50,13 +50,13 @@ jobs:
       #terraform plan
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -no-color -lock=false
         working-directory: ${{ env.working-directory }}
 
       #terraform apply
       - name: Terraform Apply
         id: apply
-        run: terraform apply
+        run: terraform apply -lock=false
         working-directory: ${{ env.working-directory }}
 
       
