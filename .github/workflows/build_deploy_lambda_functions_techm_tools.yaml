@@ -6,7 +6,7 @@ on:
     paths:
       - 'lambda/**'
       - 'terraform/lambda.tf'
-      - 'modules/lambda_function/**'
+      - 'module/lambda_function/**'
       - '.github/workflows/build_docker_image.yaml'
   workflow_dispatch:
       

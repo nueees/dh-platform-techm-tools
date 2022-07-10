@@ -54,3 +54,4 @@ resource "aws_cloudwatch_log_group" "lambda_function_log_group" {
   retention_in_days = var.cloudwatch_retention
   tags              = var.dh_tags
 }
+
